@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>努力圈圈的资料库</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            position: relative;
+        }
+
+        /* Logo样式 */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .logo-text {
+            font-family: 'Pacifico', cursive;
+            font-size: 24px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* 菜单按钮样式 */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #0066cc;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* 左侧目录样式 */
+        .sidebar {
+            width: 250px;
+            background: #2d2d2d;
+            padding: 0;
+            color: #e0e0e0;
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+            border-right: 1px solid #404040;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        /* 目录项样式 */
+        .menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-item:hover {
+            background: #404040;
+        }
+
+        .menu-item.active {
+            background: #0066cc;
+        }
+
+        .menu-item i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        /* 右侧内容区样式 */
+        .content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+            background: #1a1a1a;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                width: 80%;
+                max-width: 300px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+
+        /* 遮罩层 */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 90;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* 其他样式保持不变... */
+        /* ... (保留原有的其他样式) ... */
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/cpp.min.js"></script>
+    <script src="./config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('页面加载完成');
+            console.log('检查notes是否加载:', window.notes);
+            
+            try {
+                if (!window.notes) {
+                    throw new Error('配置文件未正确加载');
+                }
+                // 生成菜单
+                generateMenu();
+                
+                // 默认加载第一个章节
+                if (notes[0] && notes[0].sections[0]) {
+                    await loadContent(notes[0].sections[0]);
+                }
+                
+                console.log('初始化完成');
+            } catch (error) {
+                console.error('初始化失败:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="error-message">
+                        <h2>初始化失败</h2>
+                        <p>错误详情: ${error.message}</p>
+                        <p>请检查 config.js 是否正确加载</p>
+                    </div>
+                `;
+            }
+        });
+
+        // 修改 generateMenu 函数
+        function generateMenu() {
+            console.log('开始生成目录');
+            const menu = document.getElementById('menu');
+            menu.innerHTML = '';
+            
+            notes.forEach((category, index) => {
+                console.log(`生成分类: ${category.title}`);
+                const li = document.createElement('li');
+                li.className = 'menu-item';
+                li.innerHTML = `
+                    <i>📁</i>
+                    ${category.title}
+                `;
+                
+                const subMenu = document.createElement('ul');
+                subMenu.style.display = 'block';
+                subMenu.style.paddingLeft = '20px';
+                
+                category.sections.forEach(section => {
+                    console.log(`生成章节: ${section.title}`);
+                    const subLi = document.createElement('li');
+                    subLi.className = 'menu-item';
+                    subLi.innerHTML = `
+                        <i>📄</i>
+                        ${section.title}
+                    `;
+                    subLi.onclick = () => loadContent(section);
+                    subMenu.appendChild(subLi);
+                });
+
+                li.onclick = (e) => {
+                    e.stopPropagation();
+                    subMenu.style.display = 
+                        subMenu.style.display === 'none' ? 'block' : 'none';
+                };
+                
+                menu.appendChild(li);
+                menu.appendChild(subMenu);
+            });
+            console.log('目录生成完成');
+        }
+
+        // 修改 loadContent 函数
+        async function loadContent(section) {
+            try {
+                console.log('加载章节:', section.title);
+                console.log('文件路径:', section.filePath);
+                
+                // 使用 fetch 读取文件
+                const response = await fetch(section.filePath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // 读取文件内容
+                const content = await response.text();
+                console.log('文件内容已读取，长度:', content.length);
+                
+                // 保存到 section.content
+                section.content = content;
+                
+                // 转换为 HTML
+                const htmlContent = marked.parse(content);
+                document.getElementById('content').innerHTML = htmlContent;
+                
+                // 更新活动项
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    const itemText = item.textContent.trim();
+                    const sectionTitle = section.title.trim();
+                    if (itemText === sectionTitle) {
+                        item.classList.add('active');
+                        console.log('激活菜单项:', sectionTitle);
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+
+                // 处理代码块的语法高亮
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+                
+                console.log('内容加载和渲染完成');
+                
+            } catch (error) {
+                console.error('加载内容时发生错误:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="error-message">
+                        <h2>无法加载内容</h2>
+                        <p>抱歉，无法加载所请求的内容。</p>
+                        <p>错误详情: ${error.message}</p>
+                        <p>文件路径: ${section.filePath}</p>
+                        <p>请确保使用 HTTP 服务器运行此页面，例如：</p>
+                        <pre>python -m http.server 8080</pre>
+                        <p>然后访问：</p>
+                        <pre>http://localhost:8080/学习笔记.html</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // 搜索功能
+        document.querySelector('.search-input').addEventListener('input', (e) => {
+            const searchText = e.target.value.toLowerCase();
+            document.querySelectorAll('.menu-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchText) ? 'flex' : 'none';
+            });
+        });
+
+        // 返回顶部按钮
+        window.onscroll = () => {
+            const backToTop = document.querySelector('.back-to-top');
+            backToTop.classList.toggle('visible', window.scrollY > 200);
+        };
+
+        document.querySelector('.back-to-top').onclick = () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // 添加菜单切换功能
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const content = document.querySelector('.content');
+
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        function toggleMenu() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // 在移动端点击菜单项后自动关闭菜单
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleMenu();
+                }
+            });
+        });
+
+        // 监听窗口大小变化
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        });
+    </script>
+</head>
+<body>
+    <!-- 菜单切换按钮 -->
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <!-- 遮罩层 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- 左侧目录 -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+            <div class="logo-text">圈圈学习站</div>
+        </div>
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="搜索...">
+        </div>
+        <ul class="menu" id="menu">
+            <!-- 目录项会通过 JavaScript 动态生成 -->
+        </ul>
+    </div>
+
+    <!-- 右侧内容区 -->
+    <div class="content">
+        <div class="markdown-body" id="content">
+            <!-- Markdown 内容会通过 JavaScript 动态加载 -->
+        </div>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <div class="back-to-top">↑</div>
+</body>
+</html>
