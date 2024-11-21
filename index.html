@@ -58,6 +58,12 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
         }
 
         /* 左侧目录样式 */
@@ -70,8 +76,12 @@
             height: 100vh;
             position: fixed;
             border-right: 1px solid #404040;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
             z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-250px);
         }
 
         /* 目录项样式 */
@@ -104,9 +114,13 @@
         .content {
             flex: 1;
             margin-left: 250px;
-            padding: 30px;
+            padding: 30px 30px 30px 45px;
             background: #1a1a1a;
-            transition: margin-left 0.3s ease;
+            transition: all 0.3s ease;
+        }
+
+        .content.expanded {
+            margin-left: 0;
         }
 
         /* 移动端适配 */
@@ -119,6 +133,7 @@
                 transform: translateX(-100%);
                 width: 80%;
                 max-width: 300px;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.3);
             }
 
             .sidebar.active {
@@ -128,10 +143,20 @@
             .content {
                 margin-left: 0;
                 padding: 20px;
+                width: 100%;
+            }
+
+            /* 当菜单打开时，防止内容区域滚动 */
+            body.menu-open {
+                overflow: hidden;
             }
 
             .markdown-body {
                 padding: 15px;
+            }
+
+            .sidebar-toggle {
+                display: none !important;
             }
         }
 
@@ -143,16 +168,227 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
             z-index: 90;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
         }
 
         .overlay.active {
             display: block;
+            opacity: 1;
         }
 
-        /* 其他样式保持不变... */
-        /* ... (保留原有的其他样式) ... */
+        /* 添加菜单收起按钮样式 */
+        .sidebar-toggle {
+            position: fixed;
+            left: 250px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 60px;
+            background: #0066cc;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            color: white;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 101;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: #0055aa;
+        }
+
+        /* 当侧边栏收起时，按钮的位置也要相应移动 */
+        .sidebar.collapsed + .sidebar-toggle,
+        .sidebar.collapsed ~ .content .sidebar-toggle {
+            left: 0;
+        }
+
+        /* 搜索框样式优化 */
+        .search-box {
+            padding: 15px;
+            border-bottom: 1px solid #404040;
+            margin-bottom: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #404040;
+            border-radius: 20px;
+            background: #363636;
+            color: #e0e0e0;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #0066cc;
+            background: #404040;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: #808080;
+        }
+
+        /* Markdown 样式优化 */
+        .markdown-body {
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+            background: #2d2d2d;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3,
+        .markdown-body h4,
+        .markdown-body h5,
+        .markdown-body h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 1px solid #404040;
+            padding-bottom: 0.3em;
+        }
+
+        .markdown-body h1 {
+            font-size: 2em;
+            border-bottom: 2px solid #404040;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.5em;
+        }
+
+        .markdown-body p {
+            margin: 16px 0;
+            line-height: 1.8;
+        }
+
+        .markdown-body code {
+            background-color: #363636;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 85%;
+        }
+
+        .markdown-body pre {
+            background-color: #363636;
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+            margin: 16px 0;
+        }
+
+        .markdown-body pre code {
+            background: none;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .markdown-body blockquote {
+            margin: 16px 0;
+            padding: 0 16px;
+            color: #a0a0a0;
+            border-left: 4px solid #0066cc;
+            background: #363636;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            padding-left: 2em;
+            margin: 16px 0;
+        }
+
+        .markdown-body li {
+            margin: 8px 0;
+        }
+
+        .markdown-body table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+
+        .markdown-body table th,
+        .markdown-body table td {
+            padding: 8px 12px;
+            border: 1px solid #404040;
+        }
+
+        .markdown-body table th {
+            background: #363636;
+            font-weight: 600;
+        }
+
+        .markdown-body table tr:nth-child(2n) {
+            background: #333333;
+        }
+
+        .markdown-body img {
+            max-width: 100%;
+            border-radius: 4px;
+            margin: 16px 0;
+        }
+
+        .markdown-body hr {
+            height: 1px;
+            background: #404040;
+            border: none;
+            margin: 24px 0;
+        }
+
+        /* 代码块语法高亮优化 */
+        .hljs {
+            background: #2b2b2b !important;
+            border-radius: 6px;
+            padding: 16px !important;
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #505050;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #606060;
+        }
+
+        /* 在宽度大于特定值时显示箭头按钮 */
+        @media (min-width: 1024px) {
+            .sidebar-toggle {
+                display: flex;
+            }
+            
+            .sidebar.collapsed + .sidebar-toggle,
+            .sidebar.collapsed ~ .content .sidebar-toggle {
+                left: 0;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
@@ -162,8 +398,107 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('页面加载完成');
-            console.log('检查notes是否加载:', window.notes);
             
+            // 获取所有需要的DOM元素
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const content = document.querySelector('.content');
+            const searchInput = document.querySelector('.search-input');
+            const backToTop = document.querySelector('.back-to-top');
+            
+            // 搜索功能初始化
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const searchText = e.target.value.toLowerCase();
+                    document.querySelectorAll('.menu-item').forEach(item => {
+                        const text = item.textContent.toLowerCase();
+                        item.style.display = text.includes(searchText) ? 'flex' : 'none';
+                    });
+                });
+            }
+            
+            // 侧边栏收缩功能初始化
+            if (sidebarToggle && sidebar && content) {
+                // 添加侧边栏切换功能
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('collapsed');
+                    content.classList.toggle('expanded');
+                    
+                    // 更新切换按钮的箭头方向
+                    if (sidebar.classList.contains('collapsed')) {
+                        sidebarToggle.textContent = '▶';
+                    } else {
+                        sidebarToggle.textContent = '◀';
+                    }
+                    
+                    // 保存状态
+                    localStorage.setItem('sidebarCollapsed', 
+                        sidebar.classList.contains('collapsed'));
+                });
+                
+                // 恢复侧边栏状态
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                    content.classList.add('expanded');
+                    sidebarToggle.textContent = '▶';
+                }
+            }
+            
+            // 移动端菜单切换功能初始化
+            if (menuToggle && sidebar && overlay && content) {
+                menuToggle.addEventListener('click', toggleMenu);
+                overlay.addEventListener('click', toggleMenu);
+
+                // 确保在点击菜单项后关闭菜单
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        if (window.innerWidth <= 768) {
+                            if (!e.target.closest('li').querySelector('ul')) {
+                                toggleMenu();
+                            }
+                        }
+                    });
+                });
+
+                // 添加触摸滑动关闭菜单的功能
+                let touchStartX = 0;
+                let touchEndX = 0;
+
+                sidebar.addEventListener('touchstart', e => {
+                    touchStartX = e.changedTouches[0].screenX;
+                });
+
+                sidebar.addEventListener('touchend', e => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    if (touchStartX - touchEndX > 50) {
+                        toggleMenu();
+                    }
+                });
+
+                // 监听窗口大小变化
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth > 768) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            }
+            
+            // 返回顶部按钮功能初始化
+            if (backToTop) {
+                window.onscroll = () => {
+                    backToTop.classList.toggle('visible', window.scrollY > 200);
+                };
+
+                backToTop.onclick = () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+            }
+            
+            // notes 相关的初始化
             try {
                 if (!window.notes) {
                     throw new Error('配置文件未正确加载');
@@ -244,7 +579,7 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                // 读取文件内容
+                // 读取文件���容
                 const content = await response.text();
                 console.log('文件内容已读取，长度:', content.length);
                 
@@ -291,55 +626,25 @@
             }
         }
 
-        // 搜索功能
-        document.querySelector('.search-input').addEventListener('input', (e) => {
-            const searchText = e.target.value.toLowerCase();
-            document.querySelectorAll('.menu-item').forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(searchText) ? 'flex' : 'none';
-            });
-        });
-
-        // 返回顶部按钮
-        window.onscroll = () => {
-            const backToTop = document.querySelector('.back-to-top');
-            backToTop.classList.toggle('visible', window.scrollY > 200);
-        };
-
-        document.querySelector('.back-to-top').onclick = () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        // 添加菜单切换功能
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        const content = document.querySelector('.content');
-
-        menuToggle.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
-
+        // toggleMenu 函数定义
         function toggleMenu() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
-
-        // 在移动端点击菜单项后自动关闭菜单
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    toggleMenu();
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const menuButton = document.getElementById('menuToggle');
+            
+            if (sidebar && overlay && menuButton) {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.classList.toggle('menu-open');
+                
+                // 更新菜单按钮的图标
+                if (sidebar.classList.contains('active')) {
+                    menuButton.innerHTML = '×';
+                } else {
+                    menuButton.innerHTML = '☰';
                 }
-            });
-        });
-
-        // 监听窗口大小变化
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
             }
-        });
+        }
     </script>
 </head>
 <body>
@@ -362,6 +667,9 @@
             <!-- 目录项会通过 JavaScript 动态生成 -->
         </ul>
     </div>
+
+    <!-- 侧边栏切换按钮移到外面 -->
+    <button class="sidebar-toggle" id="sidebarToggle">◀</button>
 
     <!-- 右侧内容区 -->
     <div class="content">

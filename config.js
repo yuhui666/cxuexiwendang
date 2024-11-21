@@ -4,7 +4,12 @@ window.notes = [
         sections: [
             { 
                 title: '基础语法',
-                filePath: './c/基础语法.md',
+                filePath: './c/基础语法介绍.md',
+                content: ''
+            },
+            { 
+                title: '数组',
+                filePath: './c/数组介绍.md',
                 content: ''
             },
             { 
@@ -120,6 +125,71 @@ window.notes = [
             {
                 title: '并发编程',
                 filePath: './c/并发编程.md',
+                content: ''
+            }
+        ]
+    },
+    {
+        title: 'Python基础',
+        sections: [
+            {
+                title: '基础语法',
+                filePath: './python/python基础语法.md',
+                content: ''
+            },
+            {
+                title: '基础数据类型',
+                filePath: './python/python的基础数据类型.md',
+                content: ''
+            },
+            {
+                title: '数据结构',
+                filePath: './python/python数据结构.md',
+                content: ''
+            }
+        ]
+    },
+    {
+        title: 'Python进阶',
+        sections: [
+            {
+                title: '高级用法',
+                filePath: './python/python的高级用法.md',
+                content: ''
+            },
+            {
+                title: '常用库',
+                filePath: './python/常用库介绍.md',
+                content: ''
+            },
+            {
+                title: '基础库',
+                filePath: './python/基础库介绍.md',
+                content: ''
+            }
+        ]
+    },
+    {
+        title: 'Python项目',
+        sections: [
+            {
+                title: '任务管理器',
+                filePath: './python/任务管理器项目.md',
+                content: ''
+            },
+            {
+                title: '五子棋游戏',
+                filePath: './python/五子棋项目.md',
+                content: ''
+            },
+            {
+                title: '窗体应用',
+                filePath: './python/窗体项目.md',
+                content: ''
+            },
+            {
+                title: '心形动画',
+                filePath: './python/心形动画项目.md',
                 content: ''
             }
         ]

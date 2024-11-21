@@ -44,8 +44,8 @@ set ip=%ip:~1%
 
 :: 启动HTTP服务器
 echo [32m启动服务器在端口8080...[0m
-echo [32m本地访问地址: http://%ip%:8080/study.html[0m
-echo [32m局域网访问地址: http://%ip%:8080/study.html[0m
+echo [32m本地访问地址: http://%ip%:8080/index.html[0m
+echo [32m局域网访问地址: http://%ip%:8080/index.html[0m
 echo [33m按Ctrl+C可以停止服务器[0m
 echo.
 
@@ -53,7 +53,7 @@ echo.
 timeout /t 2 > nul
 
 :: 使用默认浏览器打开页面
-start http://%ip%:8080/study.html
+start http://%ip%:8080/index.html
 
 :: 启动服务器（绑定到0.0.0.0以允许局域网访问）
 python -m http.server 8080 --bind 0.0.0.0
